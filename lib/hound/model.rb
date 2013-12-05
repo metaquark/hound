@@ -14,6 +14,8 @@ module Hound
       #                      stored (optional, default: nil (no limit)).
       #           :actions - An Array of actions to track.
       #                      (default: [:create, :update, :destroy])
+      #           :attributes_excluded - An Array of attributes to exclude from tracking.
+      #                      (default: [])
       def hound(options = {})
         send :include, InstanceMethods
 
@@ -21,6 +23,8 @@ module Hound
 
         options[:actions] ||= Hound.config.actions
         options[:actions] = Array(options[:actions]).map(&:to_s)
+
+        options[:attributes_excluded] ||= []
 
         class_attribute :hound_options
         self.hound_options = options.dup
@@ -57,7 +61,9 @@ module Hound
       end
 
       def hound_update
-        create_action(action: 'update')
+        changeset = changes.except *self.class.hound_options[:attributes_excluded]
+        return if changeset.size == 0
+        create_action(action: 'update', changeset: changeset)
       end
 
       def hound_destroy
@@ -82,7 +88,6 @@ module Hound
         {
           user_id: Hound.store[:current_user_id],
           user_type: Hound.store[:current_user_type],
-          changeset: changes
         }
       end
 
