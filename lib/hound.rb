@@ -23,7 +23,7 @@ module Hound
 
   # Returns an ActionRecord::Relation for the Hound::Action model.
   def self.actions
-    Action.scoped
+    Action.all
   end
 
 end

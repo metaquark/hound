@@ -1,4 +1,3 @@
 class Article < ActiveRecord::Base
-  attr_accessible :body, :title
-  hound
+  hound(attributes_excluded: [:updated_at])
 end
